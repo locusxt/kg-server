@@ -1,39 +1,45 @@
 "use strict";
-var db = require("seraph")({user : 'neo4j', pass : 'passwd'});
+var db = require("seraph");
 
 var model = require('seraph-model');
 
 var User = model(db, 'User');
 User.schema = {
+    mtype : {type: String, required : true, default : 'User'},
 	name : {type : String, required : true, default : 'Anonymous'}
 };
 
 var Project = model(db, 'Project');
 Project.schema = {
+    mtype : {type: String, required : true, default : 'Project'},
 	name : {type : String, required : true, default : 'Unknown'},
 	description : {type : String, required : false}
 };
 
 var Value = model(db, 'Value');
 Value.schema = {
+    mtype : {type: String, required : true, default : 'Value'},
 	type : {type : String, required : true},
 	value : {type : String, required : true}
 }
 
-var Role = model(db, 'Value');
+var Role = model(db, 'Role');
 Role.schema = {
+    mtype : {type: String, required : true, default : 'Role'},
 	name : {type : String, required : true, default : ''},
 	multiplicity : {type : String}
 }
 
 var RoleInst = model(db, 'RoleInst');
 RoleInst.schema = {
+    mtype : {type: String, required : true, default : 'RoleInst'},
 	name : {type : String, required : true, default : ''},
 	rid : {type : Number, required : true, default : -1}
 }
 
 var Relation = model(db, 'Relation');
 Relation.schema = {
+    mtype : {type: String, required : true, default : 'Relation'},
 	name : {type : String, required : true},
     diversity : {type : Number},
     visible: {type:Boolean}
@@ -42,6 +48,7 @@ Relation.schema = {
 // relation instance
 var RelInst = model(db, 'RelInst');
 RelInst.schema = {
+    mtype : {type: String, required : true, default : 'RelInst'},
 	tag : {type : String, required : true},
 	tagid : {type : Number, required : true, default : -1}
 }
@@ -166,7 +173,7 @@ var createEntity =
 	var project = await readProject(pid);
 	return new Promise((resolve, reject) => {
 		var txn = db.batch();
-		var ent = txn.save({});
+		var ent = txn.save({mtype:'Entity'});
 		txn.label(ent, 'Entity');
 		if (isModel)
 			txn.label(ent, 'Model');
@@ -193,7 +200,7 @@ var getValue =
 	});
 }
 
-// value是共用的，不需要有引用关系?
+
 //不允许出现完全一样的两个Value节点
 var createValue =
 	async function(uid, pid, type, value, needRefer) {
@@ -214,7 +221,7 @@ var createValue =
 	else
 		return new Promise((resolve, reject) => {
 			var txn = db.batch();
-			var val = txn.save({type : type, value : value});
+			var val = txn.save({mtype:'Value', type : type, value : value});
 			txn.label(val, 'Value');
 			txn.relate(val, "in", project.id);
 			if (needRefer)
@@ -236,6 +243,7 @@ var readNode =
 					   })})
 }
 
+//判断User与节点直接是否有refer关系
 var isReferNode =
 	async function(uid, nid) {
 	var cypher = "START u=node({uid}), n=node({nid}) " +
@@ -295,7 +303,7 @@ var getRelInstRoles =
 	});
 }
 
-// refer一个关系时，会refer关系关联的所有角色以及角色的承担者
+// refer一个关系的实例时，会refer关系关联的所有角色以及角色的承担者
 var referRelInst =
 	async function(uid, pid, rid) {
 	var user = await readUser(uid);
@@ -347,7 +355,7 @@ var createRelInst =
 	var project = await readProject(pid);
 	return new Promise((resolve, reject) => {
 		var txn = db.batch();
-		var relInst = txn.save({tag : rel.tag, tagid : rel.tagid});
+		var relInst = txn.save({mtype:'RelInst', tag : rel.tag, tagid : rel.tagid});
 		txn.label(relInst, 'RelInst');
 		if (isModel)
 			txn.label(relInst, 'Model');
@@ -357,7 +365,7 @@ var createRelInst =
 		for (var i in rel.roles)
 		{
 			var tmpRole =
-				txn.save({name : rel.roles[i].name, rid : rel.roles[i].rid});
+				txn.save({mtype:'RoleInst', name : rel.roles[i].name, rid : rel.roles[i].rid});
 			txn.label(tmpRole, 'RoleInst');
 			txn.relate(tmpRole, 'in', project.id);
 			if (needRefer)
@@ -426,14 +434,14 @@ var createRelation = async function(uid, pid, rel){
 	var project = await readProject(pid);
 	return new Promise((resolve, reject) => {
 		var txn = db.batch();
-		var relation = txn.save({name: rel.name, diversity : rel.diversity});
+		var relation = txn.save({mtype:'Relation', name: rel.name, diversity : rel.diversity});
 		txn.label(relation, 'Relation');
         txn.label(relation, 'Model');
 		txn.relate(relation, 'in', project.id);
 		for (var i in rel.roles)
 		{
 			var tmpRole =
-				txn.save({name : rel.roles[i].name, multiplicity : rel.roles[i].multiplicity, visible:rel.roles[i].visible});
+				txn.save({mtype:'Role', name : rel.roles[i].name, multiplicity : rel.roles[i].multiplicity, visible:rel.roles[i].visible});
 			txn.label(tmpRole, 'Role');
 			txn.relate(tmpRole, 'in', project.id);
 			txn.relate(relation, 'hasRole', tmpRole);
@@ -566,8 +574,8 @@ var test =
         //
         
         // var ents = await getAllModelRelInsts(tmp2);
-        var ents = await getAllModelRelations(tmp2);
-        var res = parseRelations(ents);
+        // var ents = await getAllModelRelations(tmp2);
+        // var res = parseRelations(ents);
         console.log(res);
 	}
 	catch (error)
