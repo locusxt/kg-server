@@ -305,7 +305,7 @@ var getRelInstRoles =
 	});
 }
 
-// refer一个关系的实例时，会refer关系关联的所有角色以及角色的承担者
+// refer一个关系时，会refer关系关联的所有角色以及角色的承担者
 var referRelInst =
 	async function(uid, pid, rid) {
 	var user = await readUser(uid);
@@ -596,7 +596,7 @@ var test =
 
 		// var res = await getAllRelInsts(tmp1, tmp2);
 		// var res = await getAllEntities(tmp1, tmp2);
-		// var res = await getAllModelRelInsts(tmp2);
+		var res = await getAllModelRelInsts(tmp2);
 		console.log(res);
 		
 	}
@@ -608,3 +608,7 @@ var test =
 };
 
 test();
+
+model.exports = {
+	createUser:createUser
+}
