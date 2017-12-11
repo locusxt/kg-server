@@ -1,45 +1,45 @@
 "use strict";
-var db = require("seraph");
+var db = require("seraph")("http://localhost:7474");
 
 var model = require('seraph-model');
 
 var User = model(db, 'User');
 User.schema = {
-    mtype : {type: String, required : true, default : 'User'},
+    mtype : {type: String, required : false, default : 'User'},
 	name : {type : String, required : true, default : 'Anonymous'}
 };
 
 var Project = model(db, 'Project');
 Project.schema = {
-    mtype : {type: String, required : true, default : 'Project'},
+    mtype : {type: String, required : false, default : 'Project'},
 	name : {type : String, required : true, default : 'Unknown'},
 	description : {type : String, required : false}
 };
 
 var Value = model(db, 'Value');
 Value.schema = {
-    mtype : {type: String, required : true, default : 'Value'},
+    mtype : {type: String, required : false, default : 'Value'},
 	type : {type : String, required : true},
 	value : {type : String, required : true}
 }
 
 var Role = model(db, 'Role');
 Role.schema = {
-    mtype : {type: String, required : true, default : 'Role'},
+    mtype : {type: String, required : false, default : 'Role'},
 	name : {type : String, required : true, default : ''},
 	multiplicity : {type : String}
 }
 
 var RoleInst = model(db, 'RoleInst');
 RoleInst.schema = {
-    mtype : {type: String, required : true, default : 'RoleInst'},
+    mtype : {type: String, required : false, default : 'RoleInst'},
 	name : {type : String, required : true, default : ''},
 	rid : {type : Number, required : true, default : -1}
 }
 
 var Relation = model(db, 'Relation');
 Relation.schema = {
-    mtype : {type: String, required : true, default : 'Relation'},
+    mtype : {type: String, required : false, default : 'Relation'},
 	name : {type : String, required : true},
     diversity : {type : Number},
     visible: {type:Boolean}
@@ -48,7 +48,7 @@ Relation.schema = {
 // relation instance
 var RelInst = model(db, 'RelInst');
 RelInst.schema = {
-    mtype : {type: String, required : true, default : 'RelInst'},
+    mtype : {type: String, required : false, default : 'RelInst'},
 	tag : {type : String, required : true},
 	tagid : {type : Number, required : true, default : -1}
 }
@@ -177,6 +177,8 @@ var createEntity =
 		txn.label(ent, 'Entity');
 		if (isModel)
 			txn.label(ent, 'Model');
+		else
+			txn.label(ent, 'Inst')
 		txn.relate(ent, "in", project.id);
 		if (needRefer)
 			txn.relate(user.id, "refer", ent);
@@ -387,9 +389,9 @@ var getAllRelInsts =
 	var user = await readUser(uid);
 	var project = await readProject(pid);
 	var cypher = "START u=node({uid}), p=node({pid}) " +
-				 "MATCH (u)-[:refer]->(r:RelInst)-[:in]->(p)" +
-				 "MATCH (r)-[:hasRole]->(ri)-[:hasTarget]->(t)" +
-				 "RETURN r, ri, t";
+				 "MATCH (u)-[:refer]->(relInst:RelInst)-[:in]->(p)" +
+				 "MATCH (relInst)-[:hasRole]->(roleInst)-[:hasTarget]->(target)" +
+				 "RETURN relInst, roleInst, target";
 	return new Promise((resolve, reject) => {
 		db.query(cypher, {uid : user.id, pid : project.id}, (err, res) => {
 			if (err)
@@ -405,8 +407,8 @@ var getAllEntities =
 	var user = await readUser(uid);
 	var project = await readProject(pid);
 	var cypher = "START u=node({uid}), p=node({pid}) " +
-				 "MATCH (u)-[:refer]->(e:Entity)-[:in]->(p) " +
-				 "RETURN e";
+				 "MATCH (u)-[:refer]->(entity:Entity)-[:in]->(p) " +
+				 "RETURN entity";
 	// console.log(cypher);
 	return new Promise((resolve, reject) => {
 		db.query(cypher, {uid : user.id, pid : project.id}, (err, res) => {
@@ -460,9 +462,9 @@ var getAllModelRelations =
 async function(pid) {
 var project = await readProject(pid);
 var cypher = "START p=node({pid}) " +
-             "MATCH (r:Relation:Model)-[:in]->(p)" +
-             "MATCH (r)-[:hasRole]->(ri)-[:hasTarget]->(t)" +
-             "RETURN r, ri, t";
+             "MATCH (rel:Relation:Model)-[:in]->(p)" +
+             "MATCH (rel)-[:hasRole]->(role)-[:hasTarget]->(target)" +
+             "RETURN rel, role, target";
 return new Promise((resolve, reject) => {
     db.query(cypher, {pid : project.id}, (err, res) => {
         if (err)
@@ -476,9 +478,9 @@ var getAllModelRelInsts =
 async function(pid) {
 var project = await readProject(pid);
 var cypher = "START p=node({pid}) " +
-             "MATCH (r:RelInst:Model)-[:in]->(p)" +
-             "MATCH (r)-[:hasRole]->(ri)-[:hasTarget]->(t)" +
-             "RETURN r, ri, t";
+             "MATCH (relInst:RelInst:Model)-[:in]->(p)" +
+             "MATCH (relInst)-[:hasRole]->(roleInst)-[:hasTarget]->(target)" +
+             "RETURN relInst, roleInst, target";
 return new Promise((resolve, reject) => {
     db.query(cypher, {pid : project.id}, (err, res) => {
         if (err)
@@ -493,8 +495,8 @@ var getAllModelEntities =
 async function(pid) {
 var project = await readProject(pid);
 var cypher = "START p=node({pid}) " +
-             "MATCH (e:Entity:Model)-[:in]->(p) " +
-             "RETURN e";
+             "MATCH (entity:Entity:Model)-[:in]->(p) " +
+             "RETURN entity";
 // console.log(cypher);
 return new Promise((resolve, reject) => {
     db.query(cypher, {pid : project.id}, (err, res) => {
@@ -506,6 +508,7 @@ return new Promise((resolve, reject) => {
 }
 
 //以下是为了方便前端读取的解析部分
+//【需要重新实现一遍】
 var parseRelations = function (rels){
 
     var res = {};//{id:{info:{}, roles:[]}}
@@ -526,6 +529,8 @@ var parseRelations = function (rels){
 }
 
 //以下是测试部分
+
+//仅测试
 var entValRel = async function(user, proj, ent, val, rel, needRefer, isModel){
     var newrel = {
         tag : rel, //
@@ -571,12 +576,29 @@ var test =
         //     ]
         // }
         // var newrel3 = await createRelation(tmp1, tmp2, rel3);
-        //
         
-        // var ents = await getAllModelRelInsts(tmp2);
-        // var ents = await getAllModelRelations(tmp2);
-        // var res = parseRelations(ents);
-        console.log(res);
+        
+        // // var ents = await getAllModelRelInsts(tmp2);
+        // // var ents = await getAllModelRelations(tmp2);
+        // // var res = parseRelations(ents);
+		// // console.log(res);
+		// var lindaiyu = await createEntity(tmp1, tmp2, true, false);
+		// var v_lin = await createValue(tmp1, tmp2, "string", "林黛玉", false);
+		// var newrel_inst = {
+		// 	tag : "名称", //
+		// 	tagid : rel3.id,
+		// 	roles : [
+		// 		{name : "", tid : lindaiyu.id, rid : -1}, // rid是对应的Role的id
+		// 		{name : '名称', tid : v_lin.id, rid : -1}
+		// 	]
+		// };
+		// var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
+
+		// var res = await getAllRelInsts(tmp1, tmp2);
+		// var res = await getAllEntities(tmp1, tmp2);
+		// var res = await getAllModelRelInsts(tmp2);
+		console.log(res);
+		
 	}
 	catch (error)
 	{

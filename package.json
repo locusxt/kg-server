@@ -1,0 +1,23 @@
+{
+  "name": "kg-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "db.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/locusxt/kg-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/locusxt/kg-server/issues"
+  },
+  "homepage": "https://github.com/locusxt/kg-server#readme",
+  "dependencies": {
+    "seraph": "^0.15.3",
+    "seraph-model": "^0.10.1"
+  }
+}
