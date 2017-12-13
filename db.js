@@ -501,7 +501,7 @@ var createRelInst =
 	}
 
 // work!
-var getAllRelInsts =
+var getAllInstRelInsts =
 	async function (uid, pid) {
 		var user = await readUser(uid);
 		var project = await readProject(pid);
@@ -522,7 +522,7 @@ var getAllRelInsts =
 	}
 
 // work!
-var getAllEntities =
+var getAllInstEntities =
 	async function (uid, pid) {
 		var user = await readUser(uid);
 		var project = await readProject(pid);
@@ -540,6 +540,16 @@ var getAllEntities =
 				resolve(res);
 			});
 		});
+	}
+
+//获取实例层的数据，实例层只会有实体和关系的实例
+var getAllInstInfo = 
+	async function(uid, pid) {
+		var user = await readUser(uid);
+		var project = await readProject(pid);
+
+		var ents = await getAllInstEntities(uid, pid);
+		console.log(ents);
 	}
 
 //以下是模型层的部分
@@ -875,7 +885,9 @@ var test =
 			// var res = await getAllModelRelInsts(tmp2);
 			// console.log(res);
 
-			await getAllModelInfo(tmp2);
+			// var res = await getAllModelInfo(tmp2);
+			// console.log(res);
+			await getAllInstInfo(tmp1, tmp2);
 
 		} catch (error) {
 			console.log(error);
