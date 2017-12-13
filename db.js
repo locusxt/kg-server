@@ -127,6 +127,7 @@ RelInst.schema = {
 	} //对应的Relation的id
 }
 
+//认为概念和实体除了层次不一样之外，没有明显区别
 var Entity = model(db, 'Entity');
 
 var Model = model(db, 'Model');
@@ -607,6 +608,7 @@ var getAllModelRelations =
 	}
 
 //目前模型层不允许新建关系的实例
+//目前能获取的模型层关系的实例，只有概念的名称这一关系
 var getAllModelRelInsts =
 	async function (pid) {
 		var project = await readProject(pid);
@@ -644,26 +646,156 @@ var getAllModelEntities =
 		});
 	}
 
+/*
+预定义的关系:
+name: 概念或者实体<--name-[角色名:name]-> <<string>>
+type: 概念或者实体<--type-[角色名:type]-> <<string>>
+
+*/
+
+
+
+var getAllModelInfo =
+	async function (pid) {
+		var project = await readProject(pid);
+		var ents = await getAllModelEntities(pid);
+		// console.log(ents);
+		var ents_map = {}
+		for (var i in ents) {
+			var e = ents[i];
+			ents_map[e.id] = e;
+		}
+		// console.log(ents_map);
+
+		//整理模型层的关系实例的信息，目前主要只有name关系的实例
+		var rinsts = await getAllModelRelInsts(pid);
+		var rinsts_map = {};
+		for (var i in rinsts) {
+			var r = rinsts[i];
+			var rinst_id = r.relInst.id;
+			if (rinsts_map[rinst_id] == undefined) {
+				rinsts_map[rinst_id] = {};
+				rinsts_map[rinst_id].info = r.relInst;
+				rinsts_map[rinst_id].roleInsts = [];
+			}
+			rinsts_map[rinst_id].roleInsts.push({
+				roleInst: r.roleInst,
+				target: r.target
+			})
+		}
+		// console.log(rinsts_map);
+		//以上部分对所有关系实例都是通用的
+
+		//从关系事例中提取出和概念的名字相关内容
+		var name_list = [];
+		for (var k in rinsts_map) {
+			var name_map = {};
+			var r = rinsts_map[k];
+			var r_name = r.info.tag;
+			if (r_name == 'name') {
+				for (i in r.roleInsts) {
+					var ri = r.roleInsts[i];
+					var roleInst = ri.roleInst;
+					var tgt = ri.target;
+					if (roleInst.name == 'name' && tgt.mtype == 'Value') {
+						name_map['name'] = tgt.value;
+					} else if (tgt.mtype == 'Entity') {
+						name_map['entity'] = tgt;
+					}
+				}
+			}
+			name_list.push(name_map);
+			// console.log(name_map);
+		}
+		// console.log(name_list);
+
+		//利用name_list，更新ents_map
+		for (i in name_list) {
+			var name_map = name_list[i];
+			var name = name_map['name'];
+			var ent_id = name_map['entity'].id;
+
+			if (ents_map[ent_id] != undefined) {
+				ents_map[ent_id]['name'] = name;
+			}
+		}
+		// console.log(ents_map);
+
+		var rels = await getAllModelRelations(pid);
+		var rels_map = {};
+		for (var i in rels) {
+			var rel = rels[i];
+			var rid = rel.rel.id;
+			if (rels_map[rid] == undefined) {
+				rels_map[rid] = {};
+				rels_map[rid].roles = [];
+				rels_map[rid].info = rel.rel;
+			}
+			rels_map[rid].roles.push({
+				info: rel.role,
+				target: rel.target
+			})
+			// console.log("push: ");
+			// console.log(rel.role);
+			// console.log(rel.target);
+
+		}
+		// console.log(rels);
+		// console.log(rels_map);
+
+		// console.log("=======")
+		//用rels_map更新概念或者实体关联的关系
+		for (var k in rels_map) {
+			var rel = rels_map[k];
+			var roles = rel.roles;
+			var rid = rel.info.id;
+			for (var i in roles) {
+				var role = roles[i];
+				if (role.target.mtype == 'Entity') {
+					var tid = role.target.id;
+					// console.log(rid + " " + tid);
+					if (ents_map[tid]['related_rels'] == undefined) {
+						ents_map[tid]['related_rels'] = [];
+					}
+					if (ents_map[tid]['related_rels'].indexOf(rid) == -1) {
+						ents_map[tid]['related_rels'].push(rid);
+					}
+				}
+				// console.log(role);
+			}
+			// console.log(rel);
+			// console.log(ents_map);
+		}
+
+		var res = {};
+		// console.log(ents_map);
+		// console.log(rels_map);
+		res['entities'] = ents_map;
+		res['relations'] = rels_map;
+		// console.log(res);
+		return res;
+	}
+
 //以下是为了方便前端读取的解析部分
 //【需要重新实现一遍】
-var parseRelations = function (rels) {
+// var parseRelations = function (rels) {
 
-	var res = {}; //{id:{info:{}, roles:[]}}
-	for (var i in rels) {
-		var rel = rels[i];
-		var rid = rel.r.id;
-		if (res[rid] == undefined) {
-			res[rid] = {};
-			res[rid].roles = [];
-			res[rid].info = rel.r;
-		}
-		res[rid].roles.push({
-			role: rel.ri,
-			target: rel.t
-		})
-	}
-	return res;
-}
+// 	var res = {}; //{id:{info:{}, roles:[]}}
+// 	for (var i in rels) {
+// 		var rel = rels[i];
+// 		var rid = rel.r.id;
+// 		if (res[rid] == undefined) {
+// 			res[rid] = {};
+// 			res[rid].roles = [];
+// 			res[rid].info = rel.r;
+// 		}
+// 		res[rid].roles.push({
+// 			role: rel.ri,
+// 			target: rel.t
+// 		})
+// 	}
+// 	return res;
+// }
 
 //以下是测试部分
 
@@ -735,10 +867,15 @@ var test =
 			// };
 			// var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
 
-			var res = await getAllRelInsts(tmp1, tmp2);
+			// var res = await getAllRelInsts(tmp1, tmp2);
 			// var res = await getAllEntities(tmp1, tmp2);
-			var res = await getAllModelRelInsts(tmp2);
-			console.log(res);
+			// var res = await getAllModelRelInsts(tmp2);
+			// var res = await getAllModelEntities(tmp2);
+			// var res = await getAllModelRelations(tmp2);
+			// var res = await getAllModelRelInsts(tmp2);
+			// console.log(res);
+
+			await getAllModelInfo(tmp2);
 
 		} catch (error) {
 			console.log(error);
