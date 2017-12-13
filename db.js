@@ -1,5 +1,8 @@
 "use strict";
-var db = require("seraph")("http://localhost:7474");
+var db = require("seraph")({ server: "http://localhost:7474",
+	user: "neo4j",
+	pass: "passwd" });
+
 
 var model = require('seraph-model');
 
@@ -474,6 +477,7 @@ return new Promise((resolve, reject) => {
 });
 }
 
+//模型层不允许新建关系的实例
 var getAllModelRelInsts =
 async function(pid) {
 var project = await readProject(pid);
@@ -551,48 +555,48 @@ var test =
 		var tmp1 = await createUser("lalala");
         var tmp2 = await createProject('pro1');
         //以下是模型层的建立
-		// var a = await createEntity(tmp1, tmp2, false, true);
-        // var v = await createValue(tmp1, tmp2, "string", "人", false);
-        // await entValRel(tmp1, tmp2, a, v, "name", false, true);
-        // var b = await createEntity(tmp1, tmp2, false, true);
-        // var v2 = await createValue(tmp1, tmp2, "string", "住宅", false);
-        // await entValRel(tmp1, tmp2, b, v2, "name", false, true);
-        // var rel2 = {
-        //     name:'夫妻', //
-        //     diversity:2,
-        //     roles:[
-        //         {name:'丈夫', multiplicity:'0..1', tid:a.id},
-        //         {name:'妻子', multiplicity:'0..1', tid:a.id}
-        //     ]
-        // }
-        // var newrel2 = await createRelation(tmp1, tmp2, rel2);
+		var a = await createEntity(tmp1, tmp2, false, true);
+        var v = await createValue(tmp1, tmp2, "string", "人", false);
+        await entValRel(tmp1, tmp2, a, v, "name", false, true);
+        var b = await createEntity(tmp1, tmp2, false, true);
+        var v2 = await createValue(tmp1, tmp2, "string", "住宅", false);
+        await entValRel(tmp1, tmp2, b, v2, "name", false, true);
+        var rel2 = {
+            name:'夫妻', //
+            diversity:2,
+            roles:[
+                {name:'丈夫', multiplicity:'0..1', tid:a.id},
+                {name:'妻子', multiplicity:'0..1', tid:a.id}
+            ]
+        }
+        var newrel2 = await createRelation(tmp1, tmp2, rel2);
 
-        // var rel3 = {
-        //     name:'居住', //
-        //     diversity:2,
-        //     roles:[
-        //         {name:'居住地', multiplicity:'0..*', tid:b.id},
-        //         {name:'', multiplicity:'0..*', tid:a.id}
-        //     ]
-        // }
-        // var newrel3 = await createRelation(tmp1, tmp2, rel3);
+        var rel3 = {
+            name:'居住', //
+            diversity:2,
+            roles:[
+                {name:'居住地', multiplicity:'0..*', tid:b.id},
+                {name:'', multiplicity:'0..*', tid:a.id}
+            ]
+        }
+        var newrel3 = await createRelation(tmp1, tmp2, rel3);
         
         
-        // // var ents = await getAllModelRelInsts(tmp2);
-        // // var ents = await getAllModelRelations(tmp2);
-        // // var res = parseRelations(ents);
-		// // console.log(res);
-		// var lindaiyu = await createEntity(tmp1, tmp2, true, false);
-		// var v_lin = await createValue(tmp1, tmp2, "string", "林黛玉", false);
-		// var newrel_inst = {
-		// 	tag : "名称", //
-		// 	tagid : rel3.id,
-		// 	roles : [
-		// 		{name : "", tid : lindaiyu.id, rid : -1}, // rid是对应的Role的id
-		// 		{name : '名称', tid : v_lin.id, rid : -1}
-		// 	]
-		// };
-		// var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
+        // var ents = await getAllModelRelInsts(tmp2);
+        // var ents = await getAllModelRelations(tmp2);
+        // var res = parseRelations(ents);
+		// console.log(res);
+		var lindaiyu = await createEntity(tmp1, tmp2, true, false);
+		var v_lin = await createValue(tmp1, tmp2, "string", "林黛玉", false);
+		var newrel_inst = {
+			tag : "名称", //
+			tagid : rel3.id,
+			roles : [
+				{name : "", tid : lindaiyu.id, rid : -1}, // rid是对应的Role的id
+				{name : '名称', tid : v_lin.id, rid : -1}
+			]
+		};
+		var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
 
 		// var res = await getAllRelInsts(tmp1, tmp2);
 		// var res = await getAllEntities(tmp1, tmp2);
