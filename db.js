@@ -300,7 +300,38 @@ var referEntity =
 		});
 	}
 
+//取消实体引用时，同时取消对实体所关联的关系的实例的引用；但是不会对关系的实例的其他承担着产生影响
+var dereferEntity =
+	async function (uid, pid, eid) {
+		var user = await readUser(uid);
+		var project = await readProject(pid);
+		var ent = await readNode(eid); //保证node存在
 
+		var cypher = "START p=node({pid}), e=node({eid}), u=node({uid}) " +
+			"MATCH (rel:RelInst)-[:hasRole]->(role:RoleInst)-[:hasTarget]->(e) " + //确保关系的实例与Entity相关
+			"MATCH (rel)-[:hasRole]->(allRole:RoleInst) " + //关系的实例的所有角色
+
+			"MATCH (rel)-[:in]->(p) " + //关系的实例在project中，可以保证角色和承担者也在projject中
+
+			"MATCH (u)-[r1:refer]->(rel) " +
+			"MATCH (u)-[r2:refer]->(allRole) " +
+			"MATCH (u)-[r3:refer]->(e) " +
+
+			"DELETE r1, r2, r3";
+
+		// console.log(cypher);
+		return new Promise((resolve, reject) => {
+			db.query(cypher, {
+				pid: project.id,
+				eid: ent.id,
+				uid: user.id
+			}, (err, res) => {
+				if (err)
+					console.log(err);
+				resolve(res);
+			});
+		});
+	}
 
 // work!
 var dereferNode =
@@ -883,6 +914,9 @@ var test =
 			var res = await referEntity(u3, tmp2, 35);
 			console.log(res);
 			res = await getAllInstInfo(u3, tmp2);
+			console.log(res);
+
+			res = await dereferEntity(u3, tmp2, 35);
 			console.log(res);
 
 		} catch (error) {
