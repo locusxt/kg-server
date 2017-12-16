@@ -1,9 +1,15 @@
+/*
+ * @Author: locusxt 
+ * @Date: 2017-12-16 23:42:02 
+ * @Last Modified by:   locusxt 
+ * @Last Modified time: 2017-12-16 23:42:02 
+ */
 "use strict";
 
-var config = require("./config")
-	// console.log(config)
+var config = require("./config");
+// console.log(config)
 
-	var db = require("seraph")(config.server_config);
+var db = require("seraph")(config.server_config);
 
 var schema = require("./schema");
 
@@ -30,8 +36,8 @@ var createEntity = async function(uid, pid, needRefer, isModel = false) {
 			if (err)
 				throw err;
 			resolve(res[ent]);
-		})
-	})
+		});
+	});
 };
 
 //根据value的类型和具体的值，获取value节点
@@ -330,7 +336,7 @@ var dereferRelInst = async function(uid, pid, rid, isModel) {
 			"MATCH (r)-[hr:hasRole]->(ri:RoleInst)-[ht:hasTarget]->(tgt) " +
 			"MATCH (u)-[r1:refer]->(r) " +
 			"MATCH (u)-[r2:refer]->(ri) " +
-			"DELETE r1, r2"
+			"DELETE r1, r2";
 	}
 	else
 	{
@@ -339,7 +345,7 @@ var dereferRelInst = async function(uid, pid, rid, isModel) {
 			"MATCH (r)-[hr:hasRole]->(ri:RoleInst)-[ht:hasTarget]->(tgt) " +
 			"MATCH (r)-[i1:in]->(p) " +
 			"MATCH (ri)-[i2:in]->(p) " +
-			"DELETE r, ht, hr, ri, i1, i2 "
+			"DELETE r, ht, hr, ri, i1, i2 ";
 	}
 	// var cypher =
 	// 	"START r=node({rid}) " +

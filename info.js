@@ -1,3 +1,9 @@
+/*
+ * @Author: locusxt 
+ * @Date: 2017-12-16 23:42:12 
+ * @Last Modified by:   locusxt 
+ * @Last Modified time: 2017-12-16 23:42:12 
+ */
 var config = require("./config");
 
 var db = require("seraph")(config.server_config);
