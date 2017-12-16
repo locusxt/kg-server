@@ -471,6 +471,14 @@ var createRelInst =
 		});
 	}
 
+
+//ing...
+var dereferRelInst = 
+	async function(uid, pid, rid, isModel){
+		var user = await readUser(uid);
+		var project = await readProject(pid);
+	}
+
 // work!
 var getAllInstRelInsts =
 	async function (uid, pid) {
@@ -909,10 +917,10 @@ var test =
 			// var der = await dereferNode(tmp1, tmp2, 35);
 			// console.log(der);
 
-
-			var u3 = await createUser("u55");
-			var res = await referEntity(u3, tmp2, 35);
-			console.log(res);
+			var res = "";
+			var u3 = await createUser("u44");
+			// var res = await referEntity(u3, tmp2, 35);
+			// console.log(res);
 			res = await getAllInstInfo(u3, tmp2);
 			console.log(res);
 
