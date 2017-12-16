@@ -1,9 +1,9 @@
 "use strict";
-var db = require("seraph")({
-	server: "http://localhost:7474",
-	// user: "neo4j",
-	// pass: "passwd" 
-});
+
+var config = require("./config")
+// console.log(config)
+
+var db = require("seraph")(config.server_config);
 
 
 var model = require('seraph-model');
@@ -131,6 +131,8 @@ RelInst.schema = {
 var Entity = model(db, 'Entity');
 
 var Model = model(db, 'Model');
+
+var Inst = model(db, 'Inst');
 
 //根据用户名，获取用户
 var getUser = async function (username) {
@@ -549,6 +551,11 @@ var getAllInstInfo =
 		var project = await readProject(pid);
 
 		var ents = await getAllInstEntities(uid, pid);
+		var ents_map = {};
+		for (var i in ents){
+			var e = ents[i];
+			
+		}
 		console.log(ents);
 	}
 
