@@ -427,9 +427,45 @@ var getAllInstInfo =
 		var ents_map = {};
 		for (var i in ents) {
 			var e = ents[i];
-
+			var e_id = e.id;
+			ents_map[e_id]= e;
 		}
-		console.log(ents);
+		// console.log(ents);
+		// console.log(ents_map);
+
+		var rels = await getAllInstRelInsts(uid, pid);
+		var rels_map = {}
+		for (var i in rels){
+			var r = rels[i];
+			var rid = rels[i].relInst.id;
+			if(rels_map[rid] == undefined){
+				rels_map[rid] = {};
+				rels_map[rid].info = r.relInst;
+				rels_map[rid].roles = [];
+			}
+			rels_map[rid].roles.push({
+				info: r.roleInst,
+				target: r.target
+			})
+
+			if(r.target.mtype == 'Entity'){
+				var tid = r.target.id;
+				if (ents_map[tid]["related_rels"] == undefined){
+					ents_map[tid]["related_rels"] = [];
+				}
+				if (ents_map[tid]['related_rels'].indexOf(rid) == -1) {
+					ents_map[tid]['related_rels'].push(rid);
+				}
+			}
+		}
+		// console.log(rels);
+		// console.log(ents_map);
+		// console.log(rels_map);
+
+		var res = {};
+		res['entities'] = ents_map;
+		res['relations'] = rels_map;
+		return res;
 	}
 
 //以下是模型层的部分
@@ -712,6 +748,7 @@ var test =
 	async function () {
 		try {
 			var tmp1 = await createUser("lalala");
+			var tmp0 = await createUser("lalal");
 			var tmp2 = await createProject('pro1');
 			//以下是模型层的建立
 			// var a = await createEntity(tmp1, tmp2, false, true);
@@ -765,9 +802,11 @@ var test =
 			// var res = await getAllModelRelInsts(tmp2);
 			// console.log(res);
 
-			// var res = await getAllModelInfo(tmp2);
-			// console.log(res);
-			await getAllInstInfo(tmp1, tmp2);
+			var res = await getAllModelInfo(tmp2);
+			console.log(res);
+			console.log("=======");
+			res = await getAllInstInfo(tmp1, tmp2);
+			console.log(res);
 
 		} catch (error) {
 			console.log(error);
