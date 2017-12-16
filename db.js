@@ -310,10 +310,50 @@ var createRelInst = async function(uid, pid, rel, needRefer, isModel) {
 	});
 };
 
-// ing...
+// work!
+/* 取消对某个关系的实例的引用，会影响角色，但不会影响承担者
+如果是在实例层，去掉关系的实例以及角色的refer边
+如果是在模型层，直接delete关系的实例和角色，以及与项目之间的in关系
+*/
 var dereferRelInst = async function(uid, pid, rid, isModel) {
 	var user = await manager.readUser(uid);
 	var project = await manager.readProject(pid);
+	var rel = await readNode(rid);
+	if (rel.mtype != "RelInst")
+		throw "not a RelInst";
+
+	var cypher = "";
+	if (isModel == false)
+	{
+		cypher =
+			"START r=node({rid}), u=node({uid}) " +
+			"MATCH (r)-[hr:hasRole]->(ri:RoleInst)-[ht:hasTarget]->(tgt) " +
+			"MATCH (u)-[r1:refer]->(r) " +
+			"MATCH (u)-[r2:refer]->(ri) " +
+			"DELETE r1, r2"
+	}
+	else
+	{
+		cypher =
+			"START r=node({rid}), u=node({uid}), p=node({pid}) " +
+			"MATCH (r)-[hr:hasRole]->(ri:RoleInst)-[ht:hasTarget]->(tgt) " +
+			"MATCH (r)-[i1:in]->(p) " +
+			"MATCH (ri)-[i2:in]->(p) " +
+			"DELETE r, ht, hr, ri, i1, i2 "
+	}
+	// var cypher =
+	// 	"START r=node({rid}) " +
+	// 	"MATCH (r)-[:hasRole]->(role:RoleInst)-[:hasTarget]->(target) " +
+	// 	"RETURN role, target";
+	return new Promise((resolve, reject) => {
+		db.query(cypher, {rid : rid, uid : user.id, pid : project.id},
+				 (err, res) => {
+					 if (err)
+						 console.log(err);
+					 resolve(res);
+				 });
+	});
+
 };
 
 //以下是模型层的部分
@@ -383,47 +423,47 @@ var test = async function() {
 		var tmp0 = await manager.createUser("lalal");
 		var tmp2 = await manager.createProject('pro1');
 		//以下是模型层的建立
-		var a = await createEntity(tmp1, tmp2, false, true);
-		var v = await createValue(tmp1, tmp2, "string", "人", false);
-		await entValRel(tmp1, tmp2, a, v, "name", false, true);
-		var b = await createEntity(tmp1, tmp2, false, true);
-		var v2 = await createValue(tmp1, tmp2, "string", "住宅", false);
-		await entValRel(tmp1, tmp2, b, v2, "name", false, true);
-		var rel2 = {
-		    name:'夫妻', //
-		    diversity:2,
-		    roles:[
-		        {name:'丈夫', multiplicity:'0..1', tid:a.id},
-		        {name:'妻子', multiplicity:'0..1', tid:a.id}
-		    ]
-		}
-		var newrel2 = await createRelation(tmp1, tmp2, rel2);
+		// var a = await createEntity(tmp1, tmp2, false, true);
+		// var v = await createValue(tmp1, tmp2, "string", "人", false);
+		// await entValRel(tmp1, tmp2, a, v, "name", false, true);
+		// var b = await createEntity(tmp1, tmp2, false, true);
+		// var v2 = await createValue(tmp1, tmp2, "string", "住宅", false);
+		// await entValRel(tmp1, tmp2, b, v2, "name", false, true);
+		// var rel2 = {
+		//     name:'夫妻', //
+		//     diversity:2,
+		//     roles:[
+		//         {name:'丈夫', multiplicity:'0..1', tid:a.id},
+		//         {name:'妻子', multiplicity:'0..1', tid:a.id}
+		//     ]
+		// }
+		// var newrel2 = await createRelation(tmp1, tmp2, rel2);
 
-		var rel3 = {
-		    name:'居住', //
-		    diversity:2,
-		    roles:[
-		        {name:'居住地', multiplicity:'0..*', tid:b.id},
-		        {name:'', multiplicity:'0..*', tid:a.id}
-		    ]
-		}
-		var newrel3 = await createRelation(tmp1, tmp2, rel3);
+		// var rel3 = {
+		//     name:'居住', //
+		//     diversity:2,
+		//     roles:[
+		//         {name:'居住地', multiplicity:'0..*', tid:b.id},
+		//         {name:'', multiplicity:'0..*', tid:a.id}
+		//     ]
+		// }
+		// var newrel3 = await createRelation(tmp1, tmp2, rel3);
 
-		// var ents = await getAllModelRelInsts(tmp2);
-		// var ents = await getAllModelRelations(tmp2);
-		// var res = parseRelations(ents);
-		// console.log(res);
-		var lindaiyu = await createEntity(tmp1, tmp2, true, false);
-		var v_lin = await createValue(tmp1, tmp2, "string", "林黛玉", false);
-		var newrel_inst = {
-			tag : "名称", //
-			tagid : rel3.id,
-			roles : [
-				{name : "", tid : lindaiyu.id, rid : -1}, // rid是对应的Role的id
-				{name : '名称', tid : v_lin.id, rid : -1}
-			]
-		};
-		var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
+		// // var ents = await getAllModelRelInsts(tmp2);
+		// // var ents = await getAllModelRelations(tmp2);
+		// // var res = parseRelations(ents);
+		// // console.log(res);
+		// var lindaiyu = await createEntity(tmp1, tmp2, true, false);
+		// var v_lin = await createValue(tmp1, tmp2, "string", "林黛玉", false);
+		// var newrel_inst = {
+		// 	tag : "名称", //
+		// 	tagid : rel3.id,
+		// 	roles : [
+		// 		{name : "", tid : lindaiyu.id, rid : -1}, // rid是对应的Role的id
+		// 		{name : '名称', tid : v_lin.id, rid : -1}
+		// 	]
+		// };
+		// var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
 
 		// var res = await getAllRelInsts(tmp1, tmp2);
 		// var res = await getAllEntities(tmp1, tmp2);
@@ -444,13 +484,16 @@ var test = async function() {
 
 		// var res = "";
 		// var u3 = await manager.createUser("u44");
-		// var res = await referEntity(u3, tmp2, 145);
+		// var res = await referEntity(tmp1, tmp2, 85);
 		// console.log(res);
-		// res = await info.getAllInstInfo(u3, tmp2);
+		// var res = await info.getAllInstInfo(tmp1, tmp2);
 		// console.log(res);
 
 		// res = await dereferEntity(u3, tmp2, 35);
 		// console.log(res);
+
+		var res = await dereferRelInst(tmp1, tmp2, 40, true);
+		console.log(res);
 	}
 	catch (error)
 	{
