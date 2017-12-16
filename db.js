@@ -1,8 +1,8 @@
 /*
- * @Author: locusxt 
- * @Date: 2017-12-16 23:42:02 
+ * @Author: locusxt
+ * @Date: 2017-12-16 23:42:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-17 00:08:40
+ * @Last Modified time: 2017-12-17 00:34:21
  */
 "use strict";
 
@@ -540,3 +540,22 @@ var test = async function() {
 };
 
 test();
+
+module.exports = {
+	createEntity : createEntity,
+	getValue : getValue,
+	createValue : createValue,
+	readNode : readNode,
+	isReferNode : isReferNode,
+	referNode : referNode,
+	referEntity : referEntity,
+	dereferEntity : dereferEntity,
+	dereferNode : dereferNode,
+	readRelInst : readRelInst,
+	getRelInstRoles : getRelInstRoles,
+	referRelInst : referRelInst,
+	createRelInst : createRelInst,
+	dereferRelInst : dereferRelInst,
+	createRelation : createRelation,
+	deleteRelation : deleteRelation
+};

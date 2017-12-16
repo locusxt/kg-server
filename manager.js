@@ -1,8 +1,8 @@
 /*
  * @Author: locusxt 
  * @Date: 2017-12-16 23:42:09 
- * @Last Modified by:   locusxt 
- * @Last Modified time: 2017-12-16 23:42:09 
+ * @Last Modified by: locusxt
+ * @Last Modified time: 2017-12-17 00:36:50
  */
 var config = require("./config");
 
@@ -104,7 +104,10 @@ var isUserOwnProject = async function(uid, pid) {
 
 //建立用户和项目之间的own关系，用户对于同一个项目只能有一个own关系
 var userOwnProject = async function(uid, pid) {
-	var owns = await isUserOwnProject(uid, pid);
+	var user = await readUser(uid);
+	var project = await readProject(pid);
+	var owns = await isUserOwnProject(user.id, project.id);
+	console.log(owns);
 	if (owns.length != 0)
 		return owns[0];
 	var user = await readUser(uid);
