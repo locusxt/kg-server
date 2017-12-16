@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-16 23:42:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-17 00:34:21
+ * @Last Modified time: 2017-12-17 01:02:25
  */
 "use strict";
 
@@ -453,7 +453,7 @@ var entValRel = async function(user, proj, ent, val, rel, needRefer, isModel) {
 var test = async function() {
 	try
 	{
-		await utils.clear();
+		// await utils.clear();
 		// var tmp1 = await manager.createUser("lalala");
 		// var tmp0 = await manager.createUser("lalal");
 		// var tmp2 = await manager.createProject('pro1');
