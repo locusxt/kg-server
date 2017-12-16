@@ -1,8 +1,8 @@
 /*
  * @Author: locusxt 
  * @Date: 2017-12-16 23:42:02 
- * @Last Modified by:   locusxt 
- * @Last Modified time: 2017-12-16 23:42:02 
+ * @Last Modified by: locusxt
+ * @Last Modified time: 2017-12-17 00:08:40
  */
 "use strict";
 
@@ -16,6 +16,8 @@ var schema = require("./schema");
 var info = require("./info");
 
 var manager = require("./manager");
+
+var utils = require("./utils");
 
 //模型层和实例层的模型通过label中是否含有Model区分
 var createEntity = async function(uid, pid, needRefer, isModel = false) {
@@ -451,9 +453,10 @@ var entValRel = async function(user, proj, ent, val, rel, needRefer, isModel) {
 var test = async function() {
 	try
 	{
-		var tmp1 = await manager.createUser("lalala");
-		var tmp0 = await manager.createUser("lalal");
-		var tmp2 = await manager.createProject('pro1');
+		await utils.clear();
+		// var tmp1 = await manager.createUser("lalala");
+		// var tmp0 = await manager.createUser("lalal");
+		// var tmp2 = await manager.createProject('pro1');
 		//以下是模型层的建立
 		// var a = await createEntity(tmp1, tmp2, false, true);
 		// var v = await createValue(tmp1, tmp2, "string", "人", false);
@@ -527,7 +530,7 @@ var test = async function() {
 		// var res = await dereferRelInst(tmp1, tmp2, 40, true);
 		// console.log(res);
 
-		var res = await deleteRelation(tmp1, tmp2, 41);
+		// var res = await deleteRelation(tmp1, tmp2, 41);
 	}
 	catch (error)
 	{
