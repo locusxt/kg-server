@@ -400,6 +400,32 @@ var createRelation = async function(uid, pid, rel) {
 	});
 };
 
+// work!
+//删除关系，需要删掉关联的角色，但不会删掉承担者；还需要删掉与项目之间的in关系
+var deleteRelation =
+	async function(uid, pid, rid) {
+	var user = await manager.readUser(uid);
+	var project = await manager.readProject(pid);
+	var rel = await readNode(rid);
+	if (rel.mtype != "Relation")
+		throw "not a Relation";
+
+	var cypher =
+		"START r=node({rid}), p=node({pid}) " +
+		"MATCH (r)-[hr:hasRole]->(role:Role)-[ht:hasTarget]->(target) " +
+		"MATCH (r)-[i1:in]->(p) " +
+		"MATCH (role)-[i2:in]->(p)" +
+		"DELETE r, hr, role, ht, i1, i2";
+
+	return new Promise((resolve, reject) => {
+		db.query(cypher, {rid : rid, pid : project.id}, (err, res) => {
+			if (err)
+				console.log(err);
+			resolve(res);
+		});
+	});
+}
+
 //以下是测试部分
 
 //仅测试
@@ -492,8 +518,10 @@ var test = async function() {
 		// res = await dereferEntity(u3, tmp2, 35);
 		// console.log(res);
 
-		var res = await dereferRelInst(tmp1, tmp2, 40, true);
-		console.log(res);
+		// var res = await dereferRelInst(tmp1, tmp2, 40, true);
+		// console.log(res);
+
+		var res = await deleteRelation(tmp1, tmp2, 41);
 	}
 	catch (error)
 	{
