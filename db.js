@@ -263,6 +263,71 @@ var referNode =
 				})
 	}
 
+
+//引用Entity，同时会引用Entity上所有连接的关系的实例，以及 角色、角色的承担者
+var referEntity =
+	async function (uid, pid, eid) {
+		var user = await readUser(uid);
+		var project = await readProject(pid);
+		var ent = await readNode(eid); //保证node存在
+
+		var cypher = "START p=node({pid}), e=node({eid}), u=node({uid}) " +
+			"MATCH (rel:RelInst)-[:hasRole]->(role:RoleInst)-[:hasTarget]->(e) " + //确保关系的实例与Entity相关
+			"MATCH (rel)-[:hasRole]->(allRole:RoleInst) " + //关系的实例的所有角色
+			"MATCH (rel)-[:hasRole]->(:RoleInst)-[:hasTarget]->(t:Entity) " + //关系所关联的其他实体
+
+			"MATCH (rel)-[:in]->(p) " + //关系的实例在project中，可以保证角色和承担者也在projject中
+
+			"MERGE (u)-[:refer]->(rel) " +
+			// "MERGE (u)-[:refer]->(role) "+
+			"MERGE (u)-[:refer]->(allRole) " +
+			"MERGE (u)-[ref:refer]->(e) " +
+			"MERGE (u)-[:refer]->(t) " +
+
+			"RETURN ref";
+
+		// console.log(cypher);
+		return new Promise((resolve, reject) => {
+			db.query(cypher, {
+				pid: project.id,
+				eid: ent.id,
+				uid: user.id
+			}, (err, res) => {
+				if (err)
+					console.log(err);
+				resolve(res[0]);
+			});
+		});
+	}
+
+
+
+// work!
+var dereferNode =
+	async function (uid, pid, nid) {
+		var user = await readUser(uid);
+		// var project = await readProject(pid);
+		var node = await readNode(nid); //保证node存在
+		var refers = await isReferNode(user.id, node.id);
+		console.log(refers);
+		var len = refers.length;
+		if (len != 1) {
+			return -1;
+		} else {
+			var refer_rel = refers[0];
+			var rid = refer_rel.id;
+			return new Promise(
+				(resolve, reject) => {
+					db.rel.delete(rid, (err) => {
+						if (err)
+							throw err;
+						resolve(rid);
+					})
+				}
+			)
+		}
+	}
+
 var readRelInst =
 	async function (id) {
 		return new Promise((resolve, reject) => {
@@ -428,17 +493,17 @@ var getAllInstInfo =
 		for (var i in ents) {
 			var e = ents[i];
 			var e_id = e.id;
-			ents_map[e_id]= e;
+			ents_map[e_id] = e;
 		}
 		// console.log(ents);
 		// console.log(ents_map);
 
 		var rels = await getAllInstRelInsts(uid, pid);
 		var rels_map = {}
-		for (var i in rels){
+		for (var i in rels) {
 			var r = rels[i];
 			var rid = rels[i].relInst.id;
-			if(rels_map[rid] == undefined){
+			if (rels_map[rid] == undefined) {
 				rels_map[rid] = {};
 				rels_map[rid].info = r.relInst;
 				rels_map[rid].roles = [];
@@ -448,9 +513,11 @@ var getAllInstInfo =
 				target: r.target
 			})
 
-			if(r.target.mtype == 'Entity'){
+			if (r.target.mtype == 'Entity') {
 				var tid = r.target.id;
-				if (ents_map[tid]["related_rels"] == undefined){
+				if (ents_map[tid] == undefined)
+					continue;
+				if (ents_map[tid]["related_rels"] == undefined) {
 					ents_map[tid]["related_rels"] = [];
 				}
 				if (ents_map[tid]['related_rels'].indexOf(rid) == -1) {
@@ -802,10 +869,20 @@ var test =
 			// var res = await getAllModelRelInsts(tmp2);
 			// console.log(res);
 
-			var res = await getAllModelInfo(tmp2);
+			// var res = await getAllModelInfo(tmp2);
+			// console.log(res);
+			// console.log("=======");
+			// res = await getAllInstInfo(tmp1, tmp2);
+			// console.log(res);
+
+			// var der = await dereferNode(tmp1, tmp2, 35);
+			// console.log(der);
+
+
+			var u3 = await createUser("u55");
+			var res = await referEntity(u3, tmp2, 35);
 			console.log(res);
-			console.log("=======");
-			res = await getAllInstInfo(tmp1, tmp2);
+			res = await getAllInstInfo(u3, tmp2);
 			console.log(res);
 
 		} catch (error) {
