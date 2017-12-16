@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-16 23:42:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-17 01:27:50
+ * @Last Modified time: 2017-12-17 01:32:28
  */
 "use strict";
 
@@ -410,8 +410,7 @@ var createRelation = async function(uid, pid, rel) {
 
 // work!
 //删除关系，需要删掉关联的角色，但不会删掉承担者；还需要删掉与项目之间的in关系
-var deleteRelation =
-	async function(uid, pid, rid) {
+var deleteRelation = async function(uid, pid, rid) {
 	var user = await manager.readUser(uid);
 	var project = await manager.readProject(pid);
 	var rel = await readNode(rid);
@@ -432,114 +431,7 @@ var deleteRelation =
 			resolve(res);
 		});
 	});
-}
-
-//以下是测试部分
-
-//仅测试
-var entValRel = async function(user, proj, ent, val, rel, needRefer, isModel) {
-	var newrel = {
-		tag : rel, //
-		tagid : -1,
-		roles : [
-			{name : rel, tid : val.id}, // rid是对应的Role的id
-			{name : '', tid : ent.id}
-		]
-	};
-	var res = await createRelInst(user, proj, newrel, needRefer, isModel);
-	return res;
 };
-
-var test = async function() {
-	try
-	{
-		// await utils.clear();
-		// var tmp1 = await manager.createUser("lalala");
-		// var tmp0 = await manager.createUser("lalal");
-		// var tmp2 = await manager.createProject('pro1');
-		//以下是模型层的建立
-		// var a = await createEntity(tmp1, tmp2, false, true);
-		// var v = await createValue(tmp1, tmp2, "string", "人", false);
-		// await entValRel(tmp1, tmp2, a, v, "name", false, true);
-		// var b = await createEntity(tmp1, tmp2, false, true);
-		// var v2 = await createValue(tmp1, tmp2, "string", "住宅", false);
-		// await entValRel(tmp1, tmp2, b, v2, "name", false, true);
-		// var rel2 = {
-		//     name:'夫妻', //
-		//     diversity:2,
-		//     roles:[
-		//         {name:'丈夫', multiplicity:'0..1', tid:a.id},
-		//         {name:'妻子', multiplicity:'0..1', tid:a.id}
-		//     ]
-		// }
-		// var newrel2 = await createRelation(tmp1, tmp2, rel2);
-
-		// var rel3 = {
-		//     name:'居住', //
-		//     diversity:2,
-		//     roles:[
-		//         {name:'居住地', multiplicity:'0..*', tid:b.id},
-		//         {name:'', multiplicity:'0..*', tid:a.id}
-		//     ]
-		// }
-		// var newrel3 = await createRelation(tmp1, tmp2, rel3);
-
-		// // var ents = await getAllModelRelInsts(tmp2);
-		// // var ents = await getAllModelRelations(tmp2);
-		// // var res = parseRelations(ents);
-		// // console.log(res);
-		// var lindaiyu = await createEntity(tmp1, tmp2, true, false);
-		// var v_lin = await createValue(tmp1, tmp2, "string", "林黛玉", false);
-		// var newrel_inst = {
-		// 	tag : "名称", //
-		// 	tagid : rel3.id,
-		// 	roles : [
-		// 		{name : "", tid : lindaiyu.id, rid : -1}, // rid是对应的Role的id
-		// 		{name : '名称', tid : v_lin.id, rid : -1}
-		// 	]
-		// };
-		// var res = await createRelInst(tmp1, tmp2, newrel_inst, true, false);
-
-		// var res = await getAllRelInsts(tmp1, tmp2);
-		// var res = await getAllEntities(tmp1, tmp2);
-		// var res = await getAllModelRelInsts(tmp2);
-		// var res = await getAllModelEntities(tmp2);
-		// var res = await getAllModelRelations(tmp2);
-		// var res = await getAllModelRelInsts(tmp2);
-		// console.log(res);
-
-		// var res = await getAllModelInfo(tmp2);
-		// console.log(res);
-		// console.log("=======");
-		// res = await getAllInstInfo(tmp1, tmp2);
-		// console.log(res);
-
-		// var der = await dereferNode(tmp1, tmp2, 35);
-		// console.log(der);
-
-		// var res = "";
-		// var u3 = await manager.createUser("u44");
-		// var res = await referEntity(tmp1, tmp2, 85);
-		// console.log(res);
-		// var res = await info.getAllInstInfo(tmp1, tmp2);
-		// console.log(res);
-
-		// res = await dereferEntity(u3, tmp2, 35);
-		// console.log(res);
-
-		// var res = await dereferRelInst(tmp1, tmp2, 40, true);
-		// console.log(res);
-
-		// var res = await deleteRelation(tmp1, tmp2, 41);
-	}
-	catch (error)
-	{
-		console.log(error);
-	}
-
-};
-
-test();
 
 module.exports = {
 	createEntity : createEntity,
