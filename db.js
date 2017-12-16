@@ -5,139 +5,12 @@ var config = require("./config")
 
 var db = require("seraph")(config.server_config);
 
-
-var model = require('seraph-model');
-
-var User = model(db, 'User');
-User.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'User'
-	},
-	name: {
-		type: String,
-		required: true,
-		default: 'Anonymous'
-	}
-};
-
-var Project = model(db, 'Project');
-Project.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'Project'
-	},
-	name: {
-		type: String,
-		required: true,
-		default: 'Unknown'
-	},
-	description: {
-		type: String,
-		required: false
-	}
-};
-
-var Value = model(db, 'Value');
-Value.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'Value'
-	},
-	type: {
-		type: String,
-		required: true
-	},
-	value: {
-		type: String,
-		required: true
-	}
-}
-
-var Role = model(db, 'Role');
-Role.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'Role'
-	},
-	name: {
-		type: String,
-		required: true,
-		default: ''
-	},
-	multiplicity: {
-		type: String
-	}
-}
-
-var RoleInst = model(db, 'RoleInst');
-RoleInst.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'RoleInst'
-	},
-	name: {
-		type: String,
-		required: true,
-		default: ''
-	},
-	//rid : {type : Number, required : true, default : -1} //对应的role的id，-1表示不存在
-}
-
-var Relation = model(db, 'Relation');
-Relation.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'Relation'
-	},
-	name: {
-		type: String,
-		required: true
-	},
-	diversity: {
-		type: Number
-	},
-	visible: {
-		type: Boolean
-	} //应该是没用的了。。
-}
-
-// relation instance
-var RelInst = model(db, 'RelInst');
-RelInst.schema = {
-	mtype: {
-		type: String,
-		required: false,
-		default: 'RelInst'
-	},
-	tag: {
-		type: String,
-		required: true
-	},
-	tagid: {
-		type: Number,
-		required: true,
-		default: -1
-	} //对应的Relation的id
-}
-
-//认为概念和实体除了层次不一样之外，没有明显区别
-var Entity = model(db, 'Entity');
-
-var Model = model(db, 'Model');
-
-var Inst = model(db, 'Inst');
+var schema = require("./schema");
 
 //根据用户名，获取用户
 var getUser = async function (username) {
 	return new Promise((resolve, reject) => {
-		User.where({
+		schema.User.where({
 			name: username
 		}, (err, users) => {
 			if (err)
@@ -150,7 +23,7 @@ var getUser = async function (username) {
 var readUser =
 	async function (id) {
 		return new Promise((resolve, reject) => {
-			User.read(id, (err, res) => {
+			schema.User.read(id, (err, res) => {
 				if (err)
 					throw err;
 				resolve(res);
@@ -168,7 +41,7 @@ var createUser = async function (username) {
 		});
 	else {
 		return new Promise((resolve, reject) => {
-			User.save({
+			schema.User.save({
 				name: username
 			}, (err, res) => {
 				if (err)
@@ -182,7 +55,7 @@ var createUser = async function (username) {
 //根据项目名称获取项目
 var getProject = async function (projectname) {
 	return new Promise((resolve, reject) => {
-		Project.where({
+		schema.Project.where({
 			name: projectname
 		}, (err, projects) => {
 			if (err)
@@ -195,7 +68,7 @@ var getProject = async function (projectname) {
 var readProject =
 	async function (id) {
 		return new Promise((resolve, reject) => {
-			Project.read(id, (err, res) => {
+			schema.Project.read(id, (err, res) => {
 				if (err)
 					throw err;
 				resolve(res);
@@ -212,7 +85,7 @@ var createProject = async function (projectname) {
 		});
 	else {
 		return new Promise((resolve, reject) => {
-			Project.save({
+			schema.Project.save({
 				name: projectname
 			}, (err, res) => {
 				if (err)
@@ -290,7 +163,7 @@ var createEntity =
 var getValue =
 	async function (type, value) {
 		return new Promise((resolve, reject) => {
-			Value.where({
+			schema.Value.where({
 				type: type,
 				value: value
 			}, (err, res) => {
@@ -393,7 +266,7 @@ var referNode =
 var readRelInst =
 	async function (id) {
 		return new Promise((resolve, reject) => {
-			RelInst.read(id, (err, res) => {
+			schema.RelInst.read(id, (err, res) => {
 				if (err)
 					throw err;
 				resolve(res);
@@ -545,16 +418,16 @@ var getAllInstEntities =
 	}
 
 //获取实例层的数据，实例层只会有实体和关系的实例
-var getAllInstInfo = 
-	async function(uid, pid) {
+var getAllInstInfo =
+	async function (uid, pid) {
 		var user = await readUser(uid);
 		var project = await readProject(pid);
 
 		var ents = await getAllInstEntities(uid, pid);
 		var ents_map = {};
-		for (var i in ents){
+		for (var i in ents) {
 			var e = ents[i];
-			
+
 		}
 		console.log(ents);
 	}
@@ -904,6 +777,6 @@ var test =
 
 test();
 
-model.exports = {
+module.exports = {
 	createUser: createUser
 }
