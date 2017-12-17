@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 00:26:16
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-17 01:30:03
+ * @Last Modified time: 2017-12-17 15:32:43
  */
 
 var db = require("./db");
@@ -132,13 +132,27 @@ var testInst =
 	await db.dereferRelInst(u4, p1, rel.id, false);
 }
 
+var testInfo = 
+	async function(){
+		var u1 = await manager.createUser("u1");
+		var p1 = await manager.createProject('p1');
+
+		var instInfo = await info.getAllInstInfo(u1, p1);
+		var modelInfo = await info.getAllModelInfo(p1);
+
+		console.log(instInfo);
+		console.log("===S P L I T====");
+		console.log(modelInfo);
+	}
+
 var test =
 	async function() {
 	try
 	{
 		// await testManager();
-		// await testModel();
-		await testInst();
+		await testModel();
+		await testInst(false);
+		await testInfo();
 	}
 	catch (error)
 	{
