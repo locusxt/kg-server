@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 00:26:16
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-17 15:32:43
+ * @Last Modified time: 2017-12-18 12:11:37
  */
 
 var db = require("./db");
@@ -12,6 +12,8 @@ var info = require("./info");
 var manager = require("./manager");
 
 var utils = require("./utils");
+
+var interface = require("./interface");
 
 var init = async function() {
 	console.log("init...");
@@ -98,6 +100,20 @@ var testModel = async function(needInit = true) {
 	await db.dereferRelInst(u1, p1, relinst.id, true);
 };
 
+//不应该依赖其他test，需要重写
+var testInterface = 
+	async function(needInit = true){
+		if (needInit == true)
+			await init();
+		var u1 = await manager.createUser("u1");
+		var p1 = await manager.createProject('p1');
+
+		// await interface.addATag(u1, p1, 125, "test");
+		// await interface.addTags(u1, p1, 125, ["a", "b", "c"]);
+		// var res = await utils.getTags(u1, p1, 125);
+		// console.log(res);
+	}
+
 var testInst =
 	async function(needInit = true) {
 	if (needInit)
@@ -150,9 +166,10 @@ var test =
 	try
 	{
 		// await testManager();
-		await testModel();
-		await testInst(false);
-		await testInfo();
+		// await testModel();
+		// await testInst(false);
+		// await testInfo();
+		await testInterface(false);
 	}
 	catch (error)
 	{
