@@ -2,7 +2,7 @@
  * @Author: locusxt 
  * @Date: 2017-12-17 15:14:02 
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-18 12:17:05
+ * @Last Modified time: 2017-12-18 12:28:17
  */
 
 var db = require("./db");
@@ -47,6 +47,11 @@ var addTags =
                 await addATag(user, project, eid, t);
             }
         }
+    };
+
+var reqHandle = 
+    async function(req){
+        
     };
 
 module.exports = {
