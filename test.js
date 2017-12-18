@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 00:26:16
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-18 12:11:37
+ * @Last Modified time: 2017-12-18 19:57:38
  */
 
 var db = require("./db");
@@ -101,18 +101,18 @@ var testModel = async function(needInit = true) {
 };
 
 //不应该依赖其他test，需要重写
-var testInterface = 
-	async function(needInit = true){
-		if (needInit == true)
-			await init();
-		var u1 = await manager.createUser("u1");
-		var p1 = await manager.createProject('p1');
+var testInterface =
+	async function(needInit = true) {
+	if (needInit == true)
+		await init();
+	var u1 = await manager.createUser("u1");
+	var p1 = await manager.createProject('p1');
 
-		// await interface.addATag(u1, p1, 125, "test");
-		// await interface.addTags(u1, p1, 125, ["a", "b", "c"]);
-		// var res = await utils.getTags(u1, p1, 125);
-		// console.log(res);
-	}
+	// await interface.addATag(u1, p1, 125, "test");
+	// await interface.addTags(u1, p1, 125, ["a", "b", "c"]);
+	// var res = await utils.getTags(u1, p1, 125);
+	// console.log(res);
+}
 
 var testInst =
 	async function(needInit = true) {
@@ -148,18 +148,18 @@ var testInst =
 	await db.dereferRelInst(u4, p1, rel.id, false);
 }
 
-var testInfo = 
-	async function(){
-		var u1 = await manager.createUser("u1");
-		var p1 = await manager.createProject('p1');
+var testInfo =
+	async function() {
+	var u1 = await manager.createUser("u1");
+	var p1 = await manager.createProject('p1');
 
-		var instInfo = await info.getAllInstInfo(u1, p1);
-		var modelInfo = await info.getAllModelInfo(p1);
+	var instInfo = await info.getAllInstInfo(u1, p1);
+	var modelInfo = await info.getAllModelInfo(p1);
 
-		console.log(instInfo);
-		console.log("===S P L I T====");
-		console.log(modelInfo);
-	}
+	console.log(instInfo);
+	console.log("===S P L I T====");
+	console.log(modelInfo);
+}
 
 var test =
 	async function() {
