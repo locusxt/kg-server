@@ -2,7 +2,7 @@
  * @Author: locusxt 
  * @Date: 2017-12-17 15:14:02 
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-18 16:38:39
+ * @Last Modified time: 2017-12-18 19:55:43
  */
 
 var db = require("./db");
@@ -50,6 +50,30 @@ var addTags =
     };
 
 /*
+创建用户
+req:
+{
+    operation: "createUser",
+    reqId:"xxx", //请求的唯一标识
+    userName: "xxx"
+}
+
+response:
+{
+    reqId: "xxx",
+    userId: "7"
+}
+*/
+var reqCreateUser = 
+    async function (req){
+        var user = await manager.createUser(req.userName);
+        return {
+            reqId: req.reqId,
+            userId: user.id
+        };
+    };
+
+/*
 获取对应用户名的id
 req:
 {
@@ -63,14 +87,65 @@ response:
     reqId: "xxx",
     userId: "7"
 }
-*/var reqGetUserId = 
+*/
+var reqGetUserId = 
     async function (req){
-        var uid = await manager.getUser(req.userName);
+        var users = await manager.getUser(req.userName);
         return {
             reqId: req.reqId,
-            userId: uid
+            userId: users[0].id
         };
-    }
+    };
+
+
+/*
+获取对应项目名的项目id
+req:
+{
+    operation: "getProjectId",
+    reqId:"xxx", //请求的唯一标识
+    projectName: "xxx", 
+}
+
+response:
+{
+    reqId: "xxx",
+    projectId: "7"
+}
+*/
+var reqGetProjectId = 
+    async function (req){
+        var projs = await manager.getProject(req.projectName);
+        return {
+            reqId: req.reqId,
+            projectId: projs[0].id
+        };
+    };
+
+/*
+创建项目
+req:
+{
+    operation: "createUser",
+    reqId:"xxx", //请求的唯一标识
+    projectName: "xxx"
+}
+
+response:
+{
+    reqId: "xxx",
+    projectId: "7"
+}
+*/
+var reqCreateProject = 
+    async function (req){
+        var proj = await manager.createProject(req.projectName);
+        return {
+            reqId: req.reqId,
+            projectId: proj.id
+        };
+    };
+
 
 //以下是实例层的接口
 
@@ -94,16 +169,27 @@ var reqHandle =
         switch(req.operation){
             case "getUserId":
                 return await reqGetUserId(req);
+            case "getProjectId":
+                return await reqGetProjectId(req);
+            case "createUser":
+                return await reqCreateUser(req);
+            case "createProject":
+                return await reqCreateProject(req);
         }
     };
 
 var test = 
     async function(){
-        var res = reqHandle({
+        var res = await reqHandle({
+            operation: "createProject",
+            reqId:"xxx",
+            projectName: "p7"
 
         });
         console.log(res);
     };
+
+test();
 
 module.exports = {
     addATag:addATag,
