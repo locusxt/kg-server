@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 15:14:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-18 20:37:46
+ * @Last Modified time: 2017-12-18 23:41:00
  */
 
 var db = require("./db");
@@ -28,8 +28,8 @@ var addATag =
 			{name : "tag", tid : val.id}, // rid是对应的Role的id
 			{name : '', tid : eid}
 		]
-    }; 
-    var res = await db.createRelInst(user, project, taginst, true, false);
+	};
+	var res = await db.createRelInst(user, project, taginst, true, false);
 
 }
 
@@ -61,14 +61,14 @@ req:
 
 response:
 {
-    reqId: "xxx",
-    msg:"success",
+	reqId: "xxx",
+	msg:"success",
 	userId: "7"
 }
 */
 var reqCreateUser = async function(req) {
 	var user = await manager.createUser(req.userName);
-	return {reqId : req.reqId, userId : user.id, msg:"success"};
+	return {reqId : req.reqId, userId : user.id, msg : "success"};
 };
 
 /*
@@ -83,13 +83,13 @@ req:
 response:
 {
 	reqId: "xxx",
-    msg:"success",
+	msg:"success",
 	userId: "7"
 }
 */
 var reqGetUserId = async function(req) {
 	var users = await manager.getUser(req.userName);
-	return {reqId : req.reqId, userId : users[0].id, msg:"success"};
+	return {reqId : req.reqId, userId : users[0].id, msg : "success"};
 };
 
 /*
@@ -104,13 +104,13 @@ req:
 response:
 {
 	reqId: "xxx",
-    msg:"success",
+	msg:"success",
 	projectId: "7"
 }
 */
 var reqGetProjectId = async function(req) {
 	var projs = await manager.getProject(req.projectName);
-	return {reqId : req.reqId, projectId : projs[0].id, msg:"success"};
+	return {reqId : req.reqId, projectId : projs[0].id, msg : "success"};
 };
 
 /*
@@ -125,89 +125,120 @@ req:
 response:
 {
 	reqId: "xxx",
-    msg:"success",
+	msg:"success",
 	projectId: "7"
 }
 */
 var reqCreateProject = async function(req) {
 	var proj = await manager.createProject(req.projectName);
-	return {reqId : req.reqId, projectId : proj.id, msg:"success"};
+	return {reqId : req.reqId, projectId : proj.id, msg : "success"};
 };
 
 //以下是实例层的接口
 
 /*
 创建一个实体
-
 req:
 {
 	operation:"createEntity",
 	reqId:"xxx", //请求的唯一标识
-    userId:"7",
-    projectId:"17",
-    entity:{
-        tags:["a", "b", "c"]
-    }
+	userId:"7",
+	projectId:"17",
+	entity:{
+		tags:["a", "b", "c"]
+	}
 }
 
 response:
 {
-    reqId:"xxx",
-    msg:"success",
-    entityId:"7"
+	reqId:"xxx",
+	msg:"success",
+	entityId:"7"
 }
 */
-var reqCreateEntity =
-    async function (req){
-        var ent = await db.createEntity(req.userId, req.projectId, true, false);
-        await addTags(req.userId, req.projectId, ent.id, req.entity.tags);
-        return {reqId : req.reqId, entityId : ent.id, msg:"success"};
-    };
+var reqCreateEntity = async function(req) {
+	var ent = await db.createEntity(req.userId, req.projectId, true, false);
+	await addTags(req.userId, req.projectId, ent.id, req.entity.tags);
+	return {reqId : req.reqId, entityId : ent.id, msg : "success"};
+};
 
 /*
 创建一个实例层的关系
-
 req:
 {
 	operation:"createRelation",
 	reqId:"xxx", //请求的唯一标识
-    userId:"7",
-    projectId:"17",
-    relation:{
-        tag:"居住",
-        tagId:"7",
-        roles:[
-            {name:"角色名1", tid:"17"},
-            {name:"角色名2", val:{type:"string", value:"vvvv"}}
-        ]
+	userId:"7",
+	projectId:"17",
+	relation:{
+		tag:"居住",
+		tagId:"7", //模型层中对应的关系的id
+		roles:[
+			{name:"角色名1", tid:"17"},
+			{name:"角色名2", val:{type:"string", value:"vvvv"}}
+		]
 
-    }
+	}
 }
 
 response:
 {
-    reqId:"xxx",
-    msg:"success",
-    relationId:"7"
+	reqId:"xxx",
+	msg:"success",
+	relationId:"7"
 }
 */
-var reqCreateRelation = 
-    async function(req){
-        var roles = req.relation.roles;
-        for (var i in roles){
-            var r = roles[i];
-            if (r["tid"] == undefined){
-                if(r["val"] == undefined)
-                    throw "unknown role";
-                var newVal = r["val"];
-                var v = await db.createValue(req.userId, req.projectId, newVal.type, newVal.value, false);
-                roles[i].tid = v.id;
-            }
-        }
-        console.log(req.relation);
-        var rel = await db.createRelInst(req.userId, req.projectId, req.relation, true, false);
-        return {reqId : req.reqId, relationId : rel.id, msg:"success"};
-    }
+var reqCreateRelation = async function(req) {
+	var roles = req.relation.roles;
+	for (var i in roles)
+	{
+		var r = roles[i];
+		if (r["tid"] == undefined)
+		{
+			if (r["val"] == undefined)
+				throw "unknown role";
+			var newVal = r["val"];
+			var v = await db.createValue(req.userId, req.projectId, newVal.type,
+										 newVal.value, false);
+			roles[i].tid = v.id;
+		}
+	}
+	console.log(req.relation);
+	var rel = await db.createRelInst(req.userId, req.projectId, req.relation,
+									 true, false);
+	return {reqId : req.reqId, relationId : rel.id, msg : "success"};
+};
+
+/*
+获取实例层的信息
+req:
+{
+	operation:"getInstInfo",
+	reqId:"xxx", //请求的唯一标识
+	userId:"7",
+	projectId:"17"
+}
+
+response:
+{
+	reqId:"xxx",
+	msg:"success",
+	info:{
+		entities:{
+			'7':{
+				...
+			}
+		},
+		relations:{
+
+		}
+	}
+}
+*/
+var reqGetInstInfo = async function(req) {
+	var res = await info.getAllInstInfo(req.userId, req.projectId);
+	return {reqId : req.reqId, info : res, msg : "success"};
+};
 
 var reqHandle = async function(req) {
 	switch (req.operation)
@@ -219,11 +250,13 @@ var reqHandle = async function(req) {
 	case "createUser":
 		return await reqCreateUser(req);
 	case "createProject":
-        return await reqCreateProject(req);
-    case "createEntity":
-        return await reqCreateEntity(req);
-    case "createRelation":
-        return await reqCreateRelation(req);
+		return await reqCreateProject(req);
+	case "createEntity":
+		return await reqCreateEntity(req);
+	case "createRelation":
+		return await reqCreateRelation(req);
+	case "getInstInfo":
+		return await reqGetInstInfo(req);
 	}
 };
 
@@ -232,33 +265,40 @@ var test = async function() {
 	// 	operation : "createProject",
 	// 	reqId : "xxx",
 	// 	projectName : "p7"
-    // });
-    
-    // var res = await reqHandle({
-    //     operation:"createEntity",
-    //     reqId:"xxx", //请求的唯一标识
-    //     userId:"25",
-    //     projectId:"26",
-    //     entity:{
-    //         tags:["a", "b", "c"]
-    //     }
-    // });
-    
-    var res = await reqHandle({
-        operation:"createRelation",
-        reqId:"xxx", //请求的唯一标识
-        userId:"25",
-        projectId:"26",
-        relation:{
-            tag:"居住",
-            tagId:"7",
-            roles:[
-                {name:"角色名1", tid:"28"},
-                {name:"角色名2", val:{type:"string", value:"vvvv"}}
-            ]
+	// });
 
-        }
-    });
+	// var res = await reqHandle({
+	//     operation:"createEntity",
+	//     reqId:"xxx", //请求的唯一标识
+	//     userId:"25",
+	//     projectId:"26",
+	//     entity:{
+	//         tags:["a", "b", "c"]
+	//     }
+	// });
+
+	// var res = await reqHandle({
+	//     operation:"createRelation",
+	//     reqId:"xxx", //请求的唯一标识
+	//     userId:"25",
+	//     projectId:"26",
+	//     relation:{
+	//         tag:"居住",
+	//         tagId:"7",
+	//         roles:[
+	//             {name:"角色名1", tid:"28"},
+	//             {name:"角色名2", val:{type:"string", value:"vvvv"}}
+	//         ]
+
+	//     }
+	// });
+
+	var res = await reqHandle({
+		operation : "getInstInfo",
+		reqId : "xxx", //请求的唯一标识
+		userId : "25",
+		projectId : "26"
+	})
 	console.log(res);
 };
 
