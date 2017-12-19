@@ -186,7 +186,32 @@ response:
 }
 ```
 
-### 2.4. 获取实例层信息
+### 2.4. 删除一个实例层的关系
+
+用户提供`userId`和`projectId`，以及该关系的id
+
+```js
+req:
+{
+	operation:"deleteRelation",
+	reqId:"xxx",
+	userId:"7",
+	projectId:"17",
+	relation:{
+		id:27
+	}
+}
+
+response:
+{
+	reqId:"xxx",
+	msg:"success"
+}
+```
+
+
+
+### 2.5. 获取实例层信息
 
 用户提供`userId`和`projectId`
 

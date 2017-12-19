@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 15:14:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-19 13:58:10
+ * @Last Modified time: 2017-12-19 14:44:55
  */
 
 var db = require("./db");
@@ -92,8 +92,8 @@ var reqCreateUser = async function(req) {
 req:
 {
 	operation: "getUserId",
-	reqId:"xxx", 
-	userName: "xxx", 
+	reqId:"xxx",
+	userName: "xxx",
 }
 
 response:
@@ -187,7 +187,7 @@ req:
 	userId:"7",
 	projectId:"17",
 	entity:{
-        id:'27',
+		id:'27',
 		tags:["a", "b", "c"]
 	}
 }
@@ -199,7 +199,8 @@ response:
 	entityId:"7"
 }
 */
-var reqAddTags = async function(req){
+var reqAddTags =
+	async function(req) {
 	await addTags(req.userId, req.projectId, entity.id, req.entity.tags);
 	return {reqId : req.reqId, entityId : entity.id, msg : "success"};
 }
@@ -245,13 +246,37 @@ var reqCreateRelation = async function(req) {
 			roles[i].tid = v.id;
 		}
 	}
-	console.log(req.relation);
+	// console.log(req.relation);
 	var rel = await db.createRelInst(req.userId, req.projectId, req.relation,
 									 true, false);
 	return {reqId : req.reqId, relationId : rel.id, msg : "success"};
 };
 
+/*
+删除一个实例层的关系
+req:
+{
+	operation:"deleteRelation",
+	reqId:"xxx", //请求的唯一标识
+	userId:"7",
+	projectId:"17",
+	relation:{
+		id:27
+	}
+}
 
+response:
+{
+	reqId:"xxx",
+	msg:"success"
+}
+*/
+
+var reqDeleteRelation = async function(req) {
+	var res = await db.dereferRelInst(req.userId, req.projectId,
+									  req.relation.id, false);
+	return {reqId : req.reqId, msg : "success"};
+};
 
 /*
 获取实例层的信息
@@ -293,10 +318,10 @@ req:
 	operation:"createConcept",
 	reqId:"xxx", //请求的唯一标识
 	userId:"7",
-    projectId:"17",
-    concept:{
-        name:"c1"
-    }
+	projectId:"17",
+	concept:{
+		name:"c1"
+	}
 }
 
 response:
@@ -319,8 +344,6 @@ response:
 
 // };
 
-
-
 var reqHandle = async function(req) {
 	switch (req.operation)
 	{
@@ -336,8 +359,12 @@ var reqHandle = async function(req) {
 		return await reqCreateEntity(req);
 	case "createRelation":
 		return await reqCreateRelation(req);
+	case "deleteRelation":
+		return await reqDeleteRelation(req);
 	case "getInstInfo":
 		return await reqGetInstInfo(req);
+	default:
+		return {reqId : req.reqId, msg : "failed: no such operation"};
 	}
 };
 
@@ -374,12 +401,19 @@ var test = async function() {
 	//     }
 	// });
 
+	// var res = await reqHandle({
+	// 	operation : "getInstInfo",
+	// 	reqId : "xxx", //请求的唯一标识
+	// 	userId : "25",
+	// 	projectId : "26"
+	// });
 	var res = await reqHandle({
-		operation : "getInstInfo",
+		operation : "deleteRelation",
 		reqId : "xxx", //请求的唯一标识
 		userId : "25",
-		projectId : "26"
-	})
+		projectId : "26",
+		relation : {id : 29}
+	});
 	console.log(res);
 };
 
