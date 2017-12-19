@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 15:14:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-18 23:41:00
+ * @Last Modified time: 2017-12-19 12:37:20
  */
 
 var db = require("./db");
@@ -76,8 +76,8 @@ var reqCreateUser = async function(req) {
 req:
 {
 	operation: "getUserId",
-	reqId:"xxx", //请求的唯一标识
-	userName: "xxx", //需要查询的用户名，如果不存在则会创建一个新的用户
+	reqId:"xxx", 
+	userName: "xxx", 
 }
 
 response:
@@ -209,6 +209,8 @@ var reqCreateRelation = async function(req) {
 	return {reqId : req.reqId, relationId : rel.id, msg : "success"};
 };
 
+
+
 /*
 获取实例层的信息
 req:
@@ -239,6 +241,43 @@ var reqGetInstInfo = async function(req) {
 	var res = await info.getAllInstInfo(req.userId, req.projectId);
 	return {reqId : req.reqId, info : res, msg : "success"};
 };
+
+//以下是模型层
+
+/*
+创建一个概念
+req:
+{
+	operation:"createConcept",
+	reqId:"xxx", //请求的唯一标识
+	userId:"7",
+    projectId:"17",
+    concept:{
+        name:"c1"
+    }
+}
+
+response:
+{
+	reqId:"xxx",
+	msg:"success",
+	info:{
+		entities:{
+			'7':{
+				...
+			}
+		},
+		relations:{
+
+		}
+	}
+}
+*/
+// var reqCreateConcept = async function(req){
+
+// };
+
+
 
 var reqHandle = async function(req) {
 	switch (req.operation)
