@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 15:14:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-19 14:44:55
+ * @Last Modified time: 2017-12-19 14:57:01
  */
 
 var db = require("./db");
@@ -179,7 +179,8 @@ var reqCreateEntity = async function(req) {
 };
 
 /*
-创建一个实体
+为实体添加类型
+【计划修改为tag对应的关系的id的形式】
 req:
 {
 	operation:"addTags",
@@ -253,6 +254,35 @@ var reqCreateRelation = async function(req) {
 };
 
 /*
+为实体添加属性
+req:
+{
+	operation:"addTags",
+	reqId:"xxx", //请求的唯一标识
+	userId:"7",
+	projectId:"17",
+	entity:{
+		id:'27',
+		attr:{
+			name:"属性1",
+			id:"7",//模型层中对应关系的id
+			val:{type:"string", value:"vvvv"}
+		}
+	}
+}
+
+response:
+{
+	reqId:"xxx",
+	msg:"success",
+	entityId:"7"
+}
+*/
+var reqAddAttr = async function(req){
+	var newReq = req;
+};
+
+/*
 删除一个实例层的关系
 req:
 {
@@ -271,12 +301,13 @@ response:
 	msg:"success"
 }
 */
-
 var reqDeleteRelation = async function(req) {
 	var res = await db.dereferRelInst(req.userId, req.projectId,
 									  req.relation.id, false);
 	return {reqId : req.reqId, msg : "success"};
 };
+
+
 
 /*
 获取实例层的信息

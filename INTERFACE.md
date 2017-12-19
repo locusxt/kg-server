@@ -127,6 +127,8 @@ response:
 
 返回创建的实体的`entityId`
 
+【计划修改为，返回tag及tag对应的关系的id形式，以便于tag的删除】
+
 ```js
 req:
 {
