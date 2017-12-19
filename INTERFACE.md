@@ -95,7 +95,7 @@ response:
 
 ## 2. 实例层接口
 
-### 2.1 创建一个实体
+### 2.1. 创建一个实体
 
 用户提供`userId`和`projectId`，以及该实体的类型列表
 
@@ -121,7 +121,36 @@ response:
 }
 ```
 
-### 2.2 创建一个实例层的关系
+### 2.2. 添加类型
+
+用户提供`userId`和`projectId`，以及要添加的类型列表
+
+返回创建的实体的`entityId`
+
+```js
+req:
+{
+	operation:"addTags",
+	reqId:"xxx", 
+	userId:"7",
+	projectId:"17",
+	entity:{
+        id:'27',
+		tags:["a", "b", "c"]
+	}
+}
+
+response:
+{
+	reqId:"xxx",
+	msg:"success",
+	entityId:"7"
+}
+```
+
+
+
+### 2.3. 创建一个实例层的关系
 
 用户提供`userId`和`projectId`，以及该关系的类型、在模型层中对应关系的id
 
@@ -157,7 +186,7 @@ response:
 }
 ```
 
-### 2.3. 获取实例层信息
+### 2.4. 获取实例层信息
 
 用户提供`userId`和`projectId`
 

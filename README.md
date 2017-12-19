@@ -12,3 +12,12 @@
 8. [utils.js](utils.js)：一些工具函数
 
 
+## 2. 使用方法
+
+```js
+var interface = require('./interface')
+var req = ...
+var res = await interface.reqHandle(req)
+```
+
+允许的`req`格式，请参考[INTERFACE.md](INTERFACE.md)

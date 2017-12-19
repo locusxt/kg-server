@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 15:14:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-19 12:37:20
+ * @Last Modified time: 2017-12-19 13:08:57
  */
 
 var db = require("./db");
@@ -49,6 +49,22 @@ var addTags = async function(uid, pid, eid, taglist) {
 		}
 	}
 };
+
+// var delTags = async function(uid, pid, eid, taglist) {
+// 	var user = await manager.readUser(uid);
+// 	var project = await manager.readProject(pid);
+// 	var curTagList = await utils.getTags(uid, pid, eid);
+
+// 	for (var i in taglist)
+// 	{
+// 		var t = taglist[i];
+// 		if (curTagList.indexOf(t) == -1)
+// 		{
+// 			// newList.push(t);
+// 			await addATag(user, project, eid, t);
+// 		}
+// 	}
+// };
 
 /*
 创建用户
@@ -161,6 +177,32 @@ var reqCreateEntity = async function(req) {
 	await addTags(req.userId, req.projectId, ent.id, req.entity.tags);
 	return {reqId : req.reqId, entityId : ent.id, msg : "success"};
 };
+
+/*
+创建一个实体
+req:
+{
+	operation:"addTags",
+	reqId:"xxx", //请求的唯一标识
+	userId:"7",
+	projectId:"17",
+	entity:{
+        id:'27',
+		tags:["a", "b", "c"]
+	}
+}
+
+response:
+{
+	reqId:"xxx",
+	msg:"success",
+	entityId:"7"
+}
+*/
+var reqAddTags = async function(req){
+	await addTags(req.userId, req.projectId, entity.id, req.entity.tags);
+	return {reqId : req.reqId, entityId : entity.id, msg : "success"};
+}
 
 /*
 创建一个实例层的关系
