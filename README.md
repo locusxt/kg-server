@@ -14,6 +14,8 @@
 
 ## 2. 使用方法
 
+启动Neo4j服务器，修改`configs.js`中服务器的配置
+
 ```js
 var interface = require('./interface')
 var req = ...
