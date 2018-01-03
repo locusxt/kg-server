@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-16 23:42:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-19 14:44:41
+ * @Last Modified time: 2018-01-02 12:24:12
  */
 "use strict";
 
@@ -254,6 +254,7 @@ var referRelInst = async function(uid, pid, rid) {
 		for (var i in rolesInfo)
 		{
 			var tgt = rolesInfo[i].target;
+			//【instanceof关系会将实例层和模型层相连，所以这里需要添加一个判断】
 			await referNode(uid, pid, tgt.id);
 		}
 		return new Promise((resolve, reject) => {

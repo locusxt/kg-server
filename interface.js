@@ -2,7 +2,7 @@
  * @Author: locusxt
  * @Date: 2017-12-17 15:14:02
  * @Last Modified by: locusxt
- * @Last Modified time: 2017-12-19 14:57:01
+ * @Last Modified time: 2018-01-02 12:15:00
  */
 
 var db = require("./db");
@@ -32,6 +32,40 @@ var addATag =
 	var res = await db.createRelInst(user, project, taginst, true, false);
 
 }
+
+var addAParent =
+	async function(uid, pid, eid, parentid) {
+	var user = await manager.readUser(uid);
+	var project = await manager.readProject(pid);
+
+	// var val = await db.createValue(user, project, "string", tag, false);
+	var inst = {
+		tag : "instance_of", //
+		tagid : -2,  //用-2标识预定义的关系
+		roles : [
+			{name : "parent", tid : parentid}, // rid是对应的Role的id
+			{name : '', tid : eid}
+		]
+	};
+	var res = await db.createRelInst(user, project, inst, true, false);
+
+}
+
+var addParents = async function(uid, pid, eid, parentlist) {
+	var user = await manager.readUser(uid);
+	var project = await manager.readProject(pid);
+	var curParentList = await utils.getTags(uid, pid, eid);
+
+	for (var i in taglist)
+	{
+		var t = taglist[i];
+		if (curParentList.indexOf(t) == -1)
+		{
+			// newList.push(t);
+			await addAParent(user, project, eid, t);
+		}
+	}
+};
 
 //为Entity添加Tag
 var addTags = async function(uid, pid, eid, taglist) {
